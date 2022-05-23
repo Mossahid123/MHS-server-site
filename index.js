@@ -37,26 +37,32 @@ async function run() {
             res.send(part)
         })
         app.get('/reviews', async (req, res) => {
-            const query = {};
+            const review = req.query.review
+            const query = {review:review};
             const cursor = reviewCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
         })
         app.get('/purchase', async (req, res) => {
             const booking = req.query.booking;
-            const query = { bookin: booking };
+            const query = { booking: booking };
             const purchase = await purchaseCollection.find(query).toArray();
             res.send(purchase);
         })
         app.post('/purchase', async (req, res) => {
             const booking = req.body;
-            const query = {
-                name: booking.parts, price: booking.price, buyer: booking.buyer, buyerName: booking.buyerName, phone: booking.phone, address: booking.address, quantity: booking.quantity
-            }
-            const exists = await purchaseCollection.findOne(query);
             const result = await purchaseCollection.insertOne(booking);
             res.send(result)
         })
+        app.get('/myorders' , async(req,res) =>{
+            const buyer =req.query.buyer;
+            const query = {buyer};
+            const cursor = purchaseCollection.find(query)
+            const orders = await cursor.toArray();
+            res.send(orders)
+        })
+        
+
 
     }
     finally {
