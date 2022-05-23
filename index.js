@@ -20,7 +20,7 @@ async function run() {
     try {
         await client.connect();
         const partCollection = client.db("parts-manufacturer").collection("parts");
-        const userCollection = client.db("parts-manufacturer").collection("users");
+        const purchaseCollection = client.db("parts-manufacturer").collection("purchase");
         const reviewCollection = client.db("parts-manufacturer").collection("reviews");
 
         app.get('/parts', async (req, res) => {
@@ -28,24 +28,35 @@ async function run() {
             const cursor = partCollection.find(query);
             const parts = await cursor.toArray();
             res.send(parts);
-          });
-          app.get('/parts/:id', async(req,res) =>{
-              const id = req.params.id;
-              console.log(id)
-              const query ={_id: ObjectId(id)};
-              const part = await partCollection.findOne(query);
-              res.send(part)
-          })
-          app.get('/reviews', async (req,res) =>{
+        });
+        app.get('/parts/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const query = { _id: ObjectId(id) };
+            const part = await partCollection.findOne(query);
+            res.send(part)
+        })
+        app.get('/reviews', async (req, res) => {
             const query = {};
             const cursor = reviewCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
-          })
-          app.get('/user',  async (req, res) => {
-            const users = await userCollection.find().toArray();
-            res.send(users);
-          });
+        })
+        app.get('/purchase', async (req, res) => {
+            const booking = req.query.booking;
+            const query = { bookin: booking };
+            const purchase = await purchaseCollection.find(query).toArray();
+            res.send(purchase);
+        })
+        app.post('/purchase', async (req, res) => {
+            const booking = req.body;
+            const query = {
+                name: booking.parts, price: booking.price, buyer: booking.buyer, buyerName: booking.buyerName, phone: booking.phone, address: booking.address, quantity: booking.quantity
+            }
+            const exists = await purchaseCollection.findOne(query);
+            const result = await purchaseCollection.insertOne(booking);
+            res.send(result)
+        })
 
     }
     finally {
