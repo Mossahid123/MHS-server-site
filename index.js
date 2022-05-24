@@ -37,11 +37,15 @@ async function run() {
             res.send(part)
         })
         app.get('/reviews', async (req, res) => {
-            const review = req.query.review
-            const query = {review:review};
+            const query = {};
             const cursor = reviewCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
+        })
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result)
         })
         app.get('/purchase', async (req, res) => {
             const booking = req.query.booking;
