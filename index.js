@@ -86,19 +86,23 @@ async function run() {
             }
 
         })
-
         app.post('/purchase', async (req, res) => {
-            const purchase = req.body;
-            const result = await purchaseCollection.insertOne(purchase);
-            res.send(result)
+            const newProduct = req.body;
+            const result = await purchaseCollection.insertOne(newProduct);
+            res.send(result) 
         })
-
-        app.get('/myorders', async (req, res) => {
-            const buyer = req.query.buyer;
-            const query = { buyer };
+        app.get('/myorders',verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const query = {email};
             const cursor = purchaseCollection.find(query)
             const orders = await cursor.toArray();
             res.send(orders)
+        })
+        app.delete('/myorders/:id', async(req ,res) =>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await purchaseCollection.deleteOne(query);
+            res.send(result)
         })
         app.get('/users', verifyJWT, async (req, res) => {
             const query = {};
@@ -141,6 +145,12 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc, options);
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET)
             res.send({ result, token });
+        })
+        app.delete('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = {email:email};
+            const result = await userCollection.deleteOne(query);
+            res.send(result)
         })
 
 
